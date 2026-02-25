@@ -199,7 +199,6 @@ export default function PdfViewer() {
   const objectUrlRef = useRef(null)
 
   const [status, setStatus] = useState('idle') // idle | loading | ready | error
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [errorState, setErrorState] = useState(null) // { type, message }
   const [file, setFile] = useState('/sop.pdf')
   const [backendErrors, setBackendErrors] = useState([])
@@ -210,7 +209,6 @@ export default function PdfViewer() {
 
   const fileLabel = useMemo(() => {
     if (typeof file === 'string') {
-      if (file === '/sample.pdf') return 'sample.pdf'
       if (file === '/sop.pdf') return 'SOP.pdf'
       if (file === '/sop.png') return 'SOP (Preview)'
       return file
@@ -282,11 +280,6 @@ export default function PdfViewer() {
     await load(objectUrlRef.current)
   }
 
-  function resetToSample() {
-    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current)
-    objectUrlRef.current = null
-    load('/sop.pdf')
-  }
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages)
@@ -298,16 +291,6 @@ export default function PdfViewer() {
     setErrorState({ type: ERROR_TYPES.LOAD, message: "Failed to parse PDF document. It may be corrupted." })
   }
 
-  const handleCoordinateClick = (e, pageNum) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
-    console.log(`Coordinates for Page ${pageNum}:`, {
-      page: pageNum,
-      x: parseFloat(x.toFixed(2)),
-      y: parseFloat(y.toFixed(2)),
-    })
-  }
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6">
@@ -420,8 +403,7 @@ export default function PdfViewer() {
                 <img
                   src={file}
                   alt="Document"
-                  className="block bg-white cursor-crosshair"
-                  onClick={(e) => handleCoordinateClick(e, 1)}
+                  className="block cursor-default bg-white"
                   style={{
                     width: `${Math.round(595 * scale)}px`,
                     height: 'auto'
@@ -469,8 +451,7 @@ export default function PdfViewer() {
                       scale={scale}
                       renderTextLayer={false}
                       renderAnnotationLayer={false}
-                      className="bg-white cursor-crosshair"
-                      onClick={(e) => handleCoordinateClick(e, index + 1)}
+                      className="cursor-default bg-white"
                       loading={
                         <div className="flex h-[800px] w-[600px] items-center justify-center bg-white text-zinc-400">
                           Loading Page {index + 1}...
@@ -511,5 +492,3 @@ export default function PdfViewer() {
     </div>
   )
 }
-
-
